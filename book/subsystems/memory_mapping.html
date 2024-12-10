@@ -226,7 +226,7 @@ Reinterpretive casting is sometimes also referred to as &quot;struct overlay&quo
 <li>The same is true for functions and executable memory regions.</li>
 </ul>
 </li>
-<li>These methods all return <em>references</em> to the requested type or slice, in which the lifetime of the returned reference (<code>&amp;T</code>, `in order to prevent use-after-free errors. 
+<li>These methods all return <em>references</em> to the requested type or slice, in which the lifetime of the returned reference (<code>&amp;T</code>) is dependent upon the lifetime of the <code>MappedPages</code> object, in order to statically prevent use-after-free errors.
 <ul>
 <li>One cannot obtain an owned instance of a type <code>T</code> from an underlying <code>MappedPages</code> memory region, because that would remove the semantic connection between the type <code>T</code> and the existence of the underlying memory mapping.</li>
 </ul>
@@ -253,7 +253,7 @@ but that will happen behind the scenes without you being able to directly access
 <p>However, deallocating a range of <code>AllocatedFrames</code> is much more difficult because each page in a range of virtually-contiguous pages may likely be mapped to a different, non-contiguous set of frames.
 This means we may have to deallocate many sets of <code>AllocatedFrames</code>, up to one per page.</p>
 <p>In existing OSes, there is no way to easily and immediately determine which frames are mapped to which virtual pages; this requires a <em>reverse mapping</em> from <code>1</code> frame to <code>N</code> pages, which is prohibitively expensive to maintain.
-As such, OS kernels typically run a periodic &quot;garbage collection&quot; thread on idle CPUs that sweeps the page tables to determine </p>
+As such, OS kernels typically run a periodic &quot;garbage collection&quot; thread on idle CPUs that sweeps the page tables to determine which frames can be reclaimed.</p>
 <p>However, Theseus's design vastly simplifies the procedure of reclaiming unused physical frames for deallocation.
 The single address space design and guaranteed bijective (1-to-1) mappings mean that a frame is mapped <em>exclusively</em> by a single page; when that page is no longer mapped to that frame, the frame can be deallocated.
 We refer to this as exclusive mappings, and they are realized via a combination of several crates:</p>
@@ -265,7 +265,7 @@ We refer to this as exclusive mappings, and they are realized via a combination 
 </li>
 <li>Using strong type safety, the <a href="https://theseus-os.github.io/Theseus/doc/frame_allocator/index.html"><code>frame_allocator</code></a> is able to accept a set of <code>UnmappedFrames</code> as a trusted &quot;token&quot; stating that the included frames cannot possibly still be mapped by any pages. It can therefore safely deallocate them.
 <ul>
-<li>Deallocation occurs seamlessly because an <code>UnmappedFrames</code> object can be converted into an <code>AllocatedFrames</code> object, <a href="https://theseus-os.github.io/Theseus/doc/src/frame_allocator/lib.rs.html#393">see here for details</a>.</li>
+<li>Deallocation occurs seamlessly because an <code>UnmappedFrames</code> object can be converted into an <code>AllocatedFrames</code> object, <a href="https://www.theseus-os.com/Theseus/doc/frame_allocator/fn.init.html#return">see here for details and source</a>.</li>
 </ul>
 </li>
 </ol>

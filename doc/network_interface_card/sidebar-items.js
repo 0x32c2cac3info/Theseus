@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"trait":[["NetworkInterfaceCard","A trait that defines the necessary minimum functions that all network interface card (NIC) drivers should implement. "]]};
